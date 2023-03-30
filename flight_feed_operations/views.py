@@ -15,6 +15,9 @@ from rid_operations import view_port_ops
 import arrow
 from rid_operations.tasks import stream_rid_data
 from . import flight_stream_helper
+
+from dataclasses import dataclass
+from dacite import from_dict
 logger = logging.getLogger('django')
 
 class HomeView(TemplateView):
@@ -251,6 +254,12 @@ def set_telemetry(request):
         flight_id = rid_details['id']
         r  = TelemetryFlightDetails(id =flight_id,aircraft_type =flight_details['aircraft_type'], current_state = current_state, simulated = 0, recent_positions = [], operator_details = op_details)
         all_rid_data.append(asdict(r))
+
+    # Check with existing operations if there is a id with this operation
+
+    # Check that the operation state is 0 (not submitted to DSS) or 1 (Accepted)
+
+    # If the operation stat is not activated then set operation state and send message to the GCS
 
     stream_rid_data.delay(rid_data= json.dumps(all_rid_data))
     submission_success = {"message": "Telemetry data succesfully submitted"}
